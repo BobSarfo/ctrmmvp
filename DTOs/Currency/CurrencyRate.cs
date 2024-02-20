@@ -68,5 +68,5 @@ public class CurrencyRates
     public EffectiveDate EffectiveDate { get; set; }
     public List<EffectiveRate> EffectiveRates { get; set; }
     public Currency ToCurrency { get; set; }
-    public Dictionary<string, object> custom { get; set; }
+    public Object custom { get; set; }
 }

@@ -1,8 +1,8 @@
 namespace ctrmmvp.Data.Currency;
 
-public class ToCurrency
+public class ToCurrencyRequest
 {
-    public Value Value { get; set; }
+    public Value ToCurrency { get; set; }
 }
 
 public class Value

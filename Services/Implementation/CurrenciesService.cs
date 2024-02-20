@@ -1,40 +1,41 @@
 using System.Text;
 using System.Text.Json;
 using ctrmmvp.Data.Currency;
+using ctrmmvp.Services.Interface;
 
-public class CurrenciesService
+namespace ctrmmvp.Services.Implementation
 {
-    public async Task<CurrencyRates> GetCurrenciesAsync(string currency)
+    public class CurrenciesService : ICurrenciesService
     {
-        string url = "http://acumatica.local/dev2/entity/CTRM/2020.1/CurrencyRates?$expand=EffectiveRates";
-        string bearerToken = "1c229352046ddbf2da3f53ec3572c83e";
-        
-        var toCurrency = new ToCurrency
+        public async Task<CurrencyRates> GetCurrenciesAsync(string currency, string token)
         {
-            Value = new Value { value = currency }
-        };
+            string url = "http://acumatica.local/dev2/entity/CTRM/2020.1/CurrencyRates?$expand=EffectiveRates";
 
-        string jsonContent = JsonSerializer.Serialize(toCurrency);
+            var toCurrency = new ToCurrencyRequest
+            {
+                ToCurrency = new Value { value = currency }
+            };
 
-        using HttpClient client = new HttpClient();
+            string jsonContent = JsonSerializer.Serialize(toCurrency);
 
-        client.DefaultRequestHeaders.Clear();
-        client.DefaultRequestHeaders.Add("Accept", "application/json");
-        client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {bearerToken}");
+            using HttpClient client = new HttpClient();
 
-        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-        HttpResponseMessage response = await client.PutAsync(url, httpContent);
+            var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-        if (response.IsSuccessStatusCode)
-        {
-            string responseBody = await response.Content.ReadAsStringAsync();
-            // Handle the response body
-            var currencyRates = JsonSerializer.Deserialize<CurrencyRates>(responseBody);
-            return currencyRates;
+            HttpResponseMessage response = await client.PutAsync(url, httpContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                // Handle the response body
+                var currencyRates = JsonSerializer.Deserialize<CurrencyRates>(responseBody);
+                return currencyRates;
+            }
+
+            return null;
         }
-
-        return null;
     }
 }

@@ -2,6 +2,7 @@
 using ctrmmvp.Data.Models;
 using ctrmmvp.DTOs.Auth;
 using ctrmmvp.Services;
+using ctrmmvp.Services.Implementation;
 using ctrmmvp.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ namespace ctrmmvp.Extensions
         public static IServiceCollection AddBeans(this IServiceCollection services)
         {
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ICurrenciesService, CurrenciesService>();
 
             return services;
         }
