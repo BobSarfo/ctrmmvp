@@ -9,7 +9,9 @@ namespace ctrmmvp.Data
         {
         }
 
-        public DbSet<ArcContract> ArcContracts { get; set; }
-        public DbSet<ArcContractLine> ArcContractLines { get; set; }
+        public virtual DbSet<ArcContract> ArcContracts { get; set; }
+        public virtual DbSet<ArcContractLine> ArcContractLines { get; set; }
+        public virtual DbSet<Customer> Customers { get; set; }
+        public virtual DbSet<Employee> Employees { get; set; }
     }
 }
