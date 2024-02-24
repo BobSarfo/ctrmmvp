@@ -55,7 +55,7 @@ namespace ctrmmvp.Services.Implementation
                 // Handle the response body
                 var currencies = JsonSerializer.Deserialize<List<Currency>>(responseBody);
 
-                return currencies.Where(x=>x.UseForAccounting.value==true);
+                return currencies.Where(x => x.UseForAccounting.value == true);
             }
 
             return null;

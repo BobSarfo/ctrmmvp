@@ -27,7 +27,7 @@ namespace ctrmmvp.Extensions
             services.AddDbContext<CtrmDbContext>(options =>
              {
                  options.UseNpgsql(dbUrl, b => b.MigrationsAssembly(typeof(CtrmDbContext).Assembly.FullName));
-             }, ServiceLifetime.Transient);
+             });
 
             services.AddDbContext<AppDbContext>(options =>
             {
@@ -133,6 +133,7 @@ namespace ctrmmvp.Extensions
                     .RequireAuthenticatedUser()
                     .Build();
             });
+
             return services;
         }
     }

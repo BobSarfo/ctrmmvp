@@ -1,9 +1,13 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ctrmmvp.Data.Models
 {
     public class ArcContract
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
         public int CompanyID { get; set; }
         public int BranchID { get; set; }
         public string ContractNbr { get; set; }

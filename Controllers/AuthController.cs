@@ -2,6 +2,8 @@
 using ctrmmvp.Extensions;
 using ctrmmvp.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace ctrmmvp.Controllers
 {
@@ -43,6 +45,11 @@ namespace ctrmmvp.Controllers
         public async Task<IActionResult> LogoutAsync()
         {
             return Ok();
+        }
+
+        public async Task<object> GetCompaniesAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

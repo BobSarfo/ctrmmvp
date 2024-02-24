@@ -83,11 +83,29 @@ namespace ctrmmvp.Services
             return null;
         }
 
-        public async Task<object> GetBranchesAsync()
+        public async Task<object> GetCompaniesWithBranchesAsync(string token)
         {
             string url = "http://acumatica.local/dev2/(W(5))/entity//CTRM/2020.1//Companies?$expand=Branches";
 
-            throw new NotImplementedException();
+            using HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+            HttpResponseMessage response = await client.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                // Handle the response body
+                var currencyRates = JsonSerializer.Deserialize<List<AcuUserResponse>>(responseBody);
+
+                return currencyRates[0];
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<AccessTokenResponse?> GetAccessTokenAsync(string username, string password)
