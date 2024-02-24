@@ -17,9 +17,9 @@ namespace ctrmmvp.Data.Models
         public int DefaultCompanyId { get; set; }
 
         [Column(TypeName = "jsonb")]
-        public List<int> Branches { get; set; } = new();
+        public string Branches { get; set; }
 
         [Column(TypeName = "jsonb")]
-        public List<int> Companies { get; set; } = new();
+        public string Companies { get; set; }
     }
 }

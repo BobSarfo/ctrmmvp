@@ -1,6 +1,6 @@
 ﻿namespace ctrmmvp.DTOs
 {
-    public class StringValueField
+    public class StringValue
     {
         public string value { get; set; }
     }

@@ -1,6 +1,6 @@
 using System;
 
-namespace ctrmmvp.Data.Models;
+namespace ctrmmvp.DTOs.Customer;
 
 public class Note
 {
@@ -156,7 +156,7 @@ public class WriteOffLimit
 {
     public double value { get; set; }
 }
-    public class AcuCustomerResponse    
+public class AcuCustomerResponse
 {
     public string id { get; set; }
     public int rowNumber { get; set; }

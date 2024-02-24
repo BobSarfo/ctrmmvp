@@ -40,10 +40,18 @@ namespace ctrmmvp.Services
             }
 
             var acumaticatoken = await GetAccessTokenAsync(loginRequest.Name, loginRequest.Password);
+            if (acumaticatoken == null) { return null; }
+            var userDetails = await GetAcuUserDetails(loginRequest.Name, acumaticatoken.access_token);
+            if (userDetails is not null)
+            {
+                user.DefaultBranchId = userDetails.DefaultBranch.value;
+                user.Email = userDetails.Email.value;
+                user.FirstName = userDetails.FirstName.value;
+                user.LastName = userDetails.LastName.value;
+            }
 
             user.AcuRefreshToken = acumaticatoken.refresh_token;
             user.DefaultBranchId = acumaticatoken.branch;
-            user.Branches.Add(acumaticatoken.branch);
 
             await _userManager.UpdateAsync(user);
 
@@ -52,9 +60,38 @@ namespace ctrmmvp.Services
             return new LoginResponse { Name = user.UserName, Token = accessToken };
         }
 
+        public async Task<AcuUserResponse> GetAcuUserDetails(string name, string token)
+        {
+            string url = $"http://acumatica.local/dev2/(W(5))/entity//CTRM/2020.1/Users?$filter=FirstName eq '{name}'";
+
+            using HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+            HttpResponseMessage response = await client.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                // Handle the response body
+                var currencyRates = JsonSerializer.Deserialize<List<AcuUserResponse>>(responseBody);
+
+                return currencyRates[0];
+            }
+
+            return null;
+        }
+
+        public async Task<object> GetBranchesAsync()
+        {
+            string url = "http://acumatica.local/dev2/(W(5))/entity//CTRM/2020.1//Companies?$expand=Branches";
+
+            throw new NotImplementedException();
+        }
+
         public async Task<AccessTokenResponse?> GetAccessTokenAsync(string username, string password)
         {
-            // Prepare request data
             var requestData = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("grant_type", "password"),
@@ -63,7 +100,6 @@ namespace ctrmmvp.Services
                 new KeyValuePair<string, string>("scope", _oauthconfig.Scope)
             });
 
-            // Create HttpClient
             using var httpClient = new HttpClient();
 
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _basicAuthHeader);
@@ -96,17 +132,15 @@ namespace ctrmmvp.Services
         public async Task<object> GetAccessTokenFromRefreshTokendAsync(string refreshToken, string username)
         {
             using HttpClient httpClient = new HttpClient();
-            // Prepare request data
+
             var requestData = new FormUrlEncodedContent(new[]
             {
             new KeyValuePair<string, string>("grant_type", "refresh_token"),
             new KeyValuePair<string, string>("refresh_token", refreshToken)
         });
 
-            // Add headers
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _basicAuthHeader);
 
-            // Make POST request to token endpoint
             var response = await httpClient.PostAsync(_oauthconfig.TokenUrl, requestData);
 
             if (response.IsSuccessStatusCode)

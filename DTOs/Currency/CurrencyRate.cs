@@ -1,4 +1,6 @@
-﻿namespace ctrmmvp.Data.Currency;
+﻿using ctrmmvp.DTOs;
+
+namespace ctrmmvp.Data.Currency;
 
 public class EffectiveDate
 {
@@ -55,11 +57,6 @@ public class EffectiveRate
     public Dictionary<string, object> custom { get; set; }
 }
 
-public class Currency
-{
-    public string value { get; set; }
-}
-
 public class CurrencyRates
 {
     public string id { get; set; }
@@ -67,6 +64,6 @@ public class CurrencyRates
     public object note { get; set; }
     public EffectiveDate EffectiveDate { get; set; }
     public List<EffectiveRate> EffectiveRates { get; set; }
-    public Currency ToCurrency { get; set; }
+    public StringValue ToCurrency { get; set; }
     public Object custom { get; set; }
 }

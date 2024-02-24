@@ -1,4 +1,5 @@
 ﻿using ctrmmvp.DTOs.Auth;
+using ctrmmvp.Extensions;
 using ctrmmvp.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,6 +27,16 @@ namespace ctrmmvp.Controllers
             }
 
             return Ok(result);
+        }
+
+        [HttpGet("profile")]
+        public async Task<IActionResult> ProfileDetailsAsync()
+        {
+            var token = User.GetUserAcumaticaToken();
+            var name = User.GetUsername();
+            var res = await _authService.GetAcuUserDetails(name, token);
+
+            return Ok(res);
         }
 
         [HttpPost("logout")]

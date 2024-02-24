@@ -1,6 +1,6 @@
 ﻿namespace ctrmmvp.DTOs
 {
-    public class BoolValueField
+    public class BoolValue
     {
         public bool value { get; set; }
     }
