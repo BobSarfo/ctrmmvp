@@ -29,17 +29,15 @@ namespace ctrmmvp.Services
             _basicAuthHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_oauthconfig.ClientId}:{_oauthconfig.ClientSecret}"));
         }
 
-        public async Task<LoginResponse> LoginAsync(LoginRequest loginRequest)
+        public async Task<LoginResponse?> LoginAsync(LoginRequest? loginRequest)    
         {
-            var user = await _userManager.FindByNameAsync(loginRequest.Name);
+            if (loginRequest is null)
+                return null;
+            var user = await _userManager.FindByNameAsync(loginRequest.Name) ?? new AppUser(){UserName = loginRequest.Name};
+            
+            await _userManager.CreateAsync(user);
 
-            if (user == null)
-            {
-                user = new AppUser { UserName = loginRequest.Name };
-                await _userManager.CreateAsync(user);
-            }
-
-            var acumaticatoken = await GetAccessTokenAsync(loginRequest.Name, loginRequest.Password);
+            var acumaticatoken = await GetAccessTokenAsync(loginRequest.Name, loginRequest.Password, loginRequest.Branch, loginRequest.Company);
             if (acumaticatoken == null) { return null; }
             var userDetails = await GetAcuUserDetails(loginRequest.Name, acumaticatoken.access_token);
             if (userDetails is not null)
@@ -53,14 +51,17 @@ namespace ctrmmvp.Services
             user.AcuRefreshToken = acumaticatoken.refresh_token;
             user.DefaultBranchId = acumaticatoken.branch;
 
+            user.Branch = loginRequest.Branch;
+            user.Company = loginRequest.Company;
+            
             await _userManager.UpdateAsync(user);
 
             var accessToken = await GenerateTokenAsync(user, acumaticatoken.access_token);
 
-            return new LoginResponse { Name = user.UserName, Token = accessToken };
+            return new LoginResponse { Name = user.UserName, Token = accessToken, Branch = user.Branch, Company = user.Company};
         }
 
-        public async Task<AcuUserResponse> GetAcuUserDetails(string name, string token)
+        public async Task<AcuUserResponse?> GetAcuUserDetails(string name, string token)
         {
             string url = $"http://acumatica.local/dev2/(W(5))/entity//CTRM/2020.1/Users?$filter=FirstName eq '{name}'";
 
@@ -77,7 +78,8 @@ namespace ctrmmvp.Services
                 // Handle the response body
                 var currencyRates = JsonSerializer.Deserialize<List<AcuUserResponse>>(responseBody);
 
-                return currencyRates[0];
+                if (currencyRates is not null && currencyRates.Count > 0)
+                    return currencyRates[0];
             }
 
             return null;
@@ -90,16 +92,24 @@ namespace ctrmmvp.Services
             throw new NotImplementedException();
         }
 
-        public async Task<AccessTokenResponse?> GetAccessTokenAsync(string username, string password)
+        public async Task<AccessTokenResponse?> GetAccessTokenAsync(string username, string password, string? branch,
+            string? company)
         {
-            var requestData = new FormUrlEncodedContent(new[]
+            var paramList = new List<KeyValuePair<string, string>>();
+            paramList.Add(new KeyValuePair<string, string>("grant_type", "password"));
+            paramList.Add(new KeyValuePair<string, string>("username", username));
+            paramList.Add(new KeyValuePair<string, string>("password", password));
+            paramList.Add(new KeyValuePair<string, string>("scope", _oauthconfig.Scope));
+                
+            if ((branch is not null && company is not null) && (branch != "" && company != ""))
             {
-                new KeyValuePair<string, string>("grant_type", "password"),
-                new KeyValuePair<string, string>("username", username),
-                new KeyValuePair<string, string>("password", password),
-                new KeyValuePair<string, string>("scope", _oauthconfig.Scope)
-            });
-
+                paramList.Add(new KeyValuePair<string, string>("branch", branch));
+                paramList.Add(new KeyValuePair<string, string>("company", company));
+                
+            }
+            
+            var requestData = new FormUrlEncodedContent(paramList);
+            
             using var httpClient = new HttpClient();
 
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _basicAuthHeader);

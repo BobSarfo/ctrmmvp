@@ -17,9 +17,9 @@ namespace ctrmmvp.Data.Models
         public int DefaultCompanyId { get; set; }
 
         [Column(TypeName = "jsonb")]
-        public string Branches { get; set; }
+        public string? Branch { get; set; }
 
         [Column(TypeName = "jsonb")]
-        public string Companies { get; set; }
+        public string? Company { get; set; }    
     }
 }
