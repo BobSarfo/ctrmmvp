@@ -9,5 +9,9 @@ namespace ctrmmvp.DTOs.Auth
 
         [Required(AllowEmptyStrings = false)]
         public string Password { get; set; }
+        
+        public string? Company { get; set; }    
+        
+        public string? Branch { get; set; }
     }
 }
